@@ -3,6 +3,7 @@ import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { ChatPromptTemplate, MessagesPlaceholder } from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { HumanMessage, AIMessage } from "@langchain/core/messages";
+import readline from "readline";
 
 // 1. Initialize the Model with Stable Free Tier Settings
 const model = new ChatGoogleGenerativeAI({
@@ -48,7 +49,36 @@ async function chat(userInput) {
   }
 }
 
-// Example Execution
-console.log("Starting chatbot...");
-const output = await chat("What is my name?");
-console.log("Chatbot:", output);
+//6. Terminal Interface Setup
+const rl=readline.createInterface({
+    input:process.stdin,
+    output:process.stdout
+});
+
+async function startInteractiveChat(){
+    console.log("\n========================================");
+  console.log("  🤖 CHATBOT STARTED");
+  console.log("  (Type 'exit' or 'quit' to stop)");
+  console.log("========================================\n");
+  const ask=()=>{
+    rl.question("you: ",async(userInput)=>{
+        if (userInput.toLowerCase() === "exit" || userInput.toLowerCase() === "quit") {
+        console.log("\nGoodbye!");
+        rl.close();
+        return;
+      }
+
+      const response = await chat(userInput);
+      console.log(`\nChatbot: ${response}\n`);
+
+      ask(); // Recursive call to keep the chat going
+    })
+  };
+  ask();
+}
+
+// // Example Execution
+// console.log("Starting chatbot...");
+// const output = await chat("What is my name?");
+// console.log("Chatbot:", output);
+startInteractiveChat();
